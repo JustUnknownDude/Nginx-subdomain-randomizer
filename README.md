@@ -1,6 +1,5 @@
 # Nginx-subdomain-randomizer
  Random subdomain generator settings for nginx and cloudflare
-# Docker + wireguard fast install script
 
 # Quick start
 First, prepare your Linux server* with a fresh install of Ubuntu, Debian or etc.
