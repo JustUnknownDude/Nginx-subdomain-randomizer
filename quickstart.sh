@@ -38,8 +38,29 @@ real_ip_recursive on;
     server_name  _;
     listen [::]:80;
     location /fref/ {
-      rewrite ^/fref/(.*)$ /$1;
-	    return 301 http://$subdomain.$host$uri;
+      set $new_uri "";
+if ($request_uri ~ "^([^?]*)(\?.*)?$") {
+    rewrite ^/fref/(.*)$ /$1;
+    set $new_uri /$1;
+}
+	    return 301 http://$subdomain.$host$new_uri;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Forwarded-Host $server_name;
+      proxy_set_header Connection "";
+      proxy_redirect     off;
+      proxy_connect_timeout  300;
+      proxy_http_version 1.1;
+      proxy_buffers 16 16k;
+      proxy_buffer_size 16k;
+      proxy_cache_background_update on;
+      real_ip_header X-Forwarded-For;
+      real_ip_recursive on;
+    }
+        location /ref/ {
+	    return 301 http://$subdomain.$host$request_uri;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto $scheme;
@@ -71,23 +92,23 @@ set_real_ip_from 172.64.0.0/13;
 set_real_ip_from 131.0.72.0/22;
 real_ip_header X-Forwarded-For;
 real_ip_recursive on;
+
 listen 80;
 server_name ~^(sub1000)\.*.*$;
 location / {
-proxy_set_header X-Real-IP $remote_addr;
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-proxy_set_header X-Forwarded-Proto $scheme;
-proxy_set_header Host $http_host;
-proxy_set_header X-Forwarded-Host $server_name;
-proxy_set_header Connection "";
-proxy_redirect     off;
-proxy_connect_timeout  300;
-proxy_http_version 1.1;
-proxy_buffers 16 16k;
-proxy_buffer_size 16k;
-proxy_cache_background_update on;
-proxy_pass http://targetip/;
-}
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Forwarded-Host $server_name;
+      proxy_set_header Connection "";
+      proxy_connect_timeout  300;
+      proxy_http_version 1.1;
+      proxy_buffers 16 16k;
+      proxy_buffer_size 16k;
+      proxy_cache_background_update on;
+      proxy_pass http://targetip/;
+    }
 }
 EOF
 echo "Enter the target server ip. Example: 1.1.1.1"
@@ -333,5 +354,15 @@ if ($http_user_agent ~* "AdsBot-Google-Mobile-Apps"){ return 403; }
 if ($http_user_agent ~* "facebookexternalhit/1.0"){ return 403; }
 if ($http_user_agent ~* "facebookexternalhit/1.1"){ return 403; }
 if ($http_user_agent ~* "facebookexternalhit/1.1 (http://www.facebook.com/externalhit_uatext.php)"){ return 403; }
+if ($http_user_agent ~* "Mozilla/5.0 (Linux; Android 4.0.4; MegaFon_SP-AI Build/1.2.10.4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Mobile Safari/537.36 OPR/18.0.1290.67495"){ return 403; }
+if ($http_user_agent ~* "Mozilla/5.0 (Linux; Android 4.0.4; MegaFon_SP-AI Build/1.2.10.4)"){ return 403; }
+if ($http_user_agent ~* "Mozilla/5.0 (Linux; U; Android 4.0.4; ru-ru; SP-A20i Build/MF_ICS_02.34) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"){ return 403; }
+if ($http_user_agent ~* "Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)"){ return 403; }
+if ($http_user_agent ~* "Mozilla/5.0 (Linux; Android 9; HRY-LX1T Build/HONORHRY-LX1T; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile Safari/537.36 YandexSearch/7.30 YandexSearchBrowser/7.30"){ return 403; }
+if ($http_user_agent ~* "Mozilla/5.0 (Linux; Android 10; HRY-LX1 Build/HONORHRY-L21; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36 YandexSearch/7.80 YandexSearchBrowser/7.80"){ return 403; }
+if ($http_user_agent ~* "YandexSearch/7.80"){ return 403; }
+if ($http_user_agent ~* "YandexSearchBrowser/7.80"){ return 403; }
+if ($http_user_agent ~* "YandexBot/3.0"){ return 403; }
+if ($http_user_agent ~* "Mozilla/5.0 (Linux; Android 7.1.1; SM-J510FN Build/NMF26X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/64.0.3282.137 Mobile Safari/537.36 YandexSearch/6.45"){ return 403; }
 EOF
 systemctl start nginx && systemctl start nginx
