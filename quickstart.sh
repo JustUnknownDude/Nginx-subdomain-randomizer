@@ -1,15 +1,8 @@
 #!/bin/bash
 apt update && apt install -y nginx
-echo syb1000 > /sub
-cat <<EOF > /random.sh
-#!/bin/bash
-oldsub=$(cat /sub)
-sub=$(echo sub$((RANDOM)))
-echo $sub > /sub
-sed -i -r "s/$oldsub/$sub/g" /etc/nginx/conf.d/all.conf;
-sleep 1s; 
-service nginx restart
-EOF
+echo sub1000 > /sub
+cd /
+wget https://raw.githubusercontent.com/JustUnknownDude/Nginx-subdomain-randomizer/main/random.sh
 chmod +x /random.sh
 rm /etc/nginx/conf.d/default.conf >> /dev/null
 rm /etc/nginx/sites-enabled/default.conf >> /dev/null
