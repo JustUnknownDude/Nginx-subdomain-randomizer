@@ -12,7 +12,7 @@ service nginx restart
 EOF
 chmod +x /random.sh
 rm /etc/nginx/conf.d/default.conf >> /dev/null
-rm /etc/nginx/sites-available/default.conf >> /dev/null
+rm /etc/nginx/sites-enabled/default.conf >> /dev/null
 cat <<EOF > /etc/nginx/conf.d/all.conf
 server {
 set_real_ip_from 173.245.48.0/20;
